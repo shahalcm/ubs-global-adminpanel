@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #1a237e;
+  --color-accent: #29b6f6;
+  --color-sidebar: #0f172a;
+  --font-sans: 'Inter', sans-serif;
+}
+
+@layer base {
+  body {
+    @apply font-sans antialiased bg-[#f8fafc] text-gray-900;
+  }
+}
+
+@utility bg-gradient-primary {
+  @apply bg-linear-to-br from-primary to-sidebar;
+}
