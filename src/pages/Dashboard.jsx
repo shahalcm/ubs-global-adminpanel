@@ -1,5 +1,14 @@
 import React from 'react';
-import { Users, Store, Package, DollarSign, ShoppingBag, Clock, X, TrendingUp, TrendingDown } from 'lucide-react';
+import { Users, Store, Package, DollarSign, ShoppingBag, Clock, X, TrendingUp, TrendingDown, Plus, FolderPlus, Bell, FileText, Image as ImageIcon, DownloadCloud } from 'lucide-react';
+
+const quickActions = [
+  { icon: Plus, label: 'Add Product', color: 'text-blue-600', bgColor: 'bg-blue-100', hoverColor: 'group-hover:bg-blue-500', hoverText: 'group-hover:text-white' },
+  { icon: FolderPlus, label: 'Add Category', color: 'text-purple-600', bgColor: 'bg-purple-100', hoverColor: 'group-hover:bg-purple-500', hoverText: 'group-hover:text-white' },
+  { icon: Bell, label: 'Notifications', color: 'text-orange-600', bgColor: 'bg-orange-100', hoverColor: 'group-hover:bg-orange-500', hoverText: 'group-hover:text-white' },
+  { icon: FileText, label: 'View Reports', color: 'text-green-600', bgColor: 'bg-green-100', hoverColor: 'group-hover:bg-green-500', hoverText: 'group-hover:text-white' },
+  { icon: ImageIcon, label: 'Banners', color: 'text-pink-600', bgColor: 'bg-pink-100', hoverColor: 'group-hover:bg-pink-500', hoverText: 'group-hover:text-white' },
+  { icon: DownloadCloud, label: 'Export Data', color: 'text-teal-600', bgColor: 'bg-teal-100', hoverColor: 'group-hover:bg-teal-500', hoverText: 'group-hover:text-white' },
+];
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { formatCurrency } from '../utils/formatters';
 
@@ -126,6 +135,24 @@ const Dashboard = () => {
             <p className="text-sm text-gray-500">Cancelled Orders</p>
             <p className="text-xl font-bold text-gray-900">128</p>
           </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div>
+        <h3 className="font-bold text-gray-900 mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {quickActions.map((action, idx) => {
+            const Icon = action.icon;
+            return (
+              <button key={idx} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center hover:shadow-md transition-all group hover:-translate-y-1">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-colors ${action.bgColor} ${action.hoverColor}`}>
+                  <Icon className={`transition-colors ${action.color} ${action.hoverText}`} size={24} />
+                </div>
+                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{action.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
