@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Removed unused react-form import
 import { Mail, Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
+import useAuthStore from '../store/authStore';
 import toast from 'react-hot-toast';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('shahal@gmail.com');
-  const [password, setPassword] = useState('shahalpanayi');
+  const [email, setEmail] = useState('admin@ubsglobal.com');
+  const [password, setPassword] = useState('Admin@123456');
   const [loading, setLoading] = useState(false);
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
@@ -16,13 +16,15 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      login(email, password);
+    try {
+      await login(email, password);
       toast.success('Successfully logged in!');
       navigate('/dashboard');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Login failed');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -52,21 +54,21 @@ const Login = () => {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-white lg:bg-transparent">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-[#F4F7FE] dark:bg-dark-bg lg:bg-transparent">
+        <div className="w-full max-w-md bg-white dark:bg-dark-card rounded-[24px] shadow-soft dark:shadow-soft-dark border border-gray-100 dark:border-gray-800 p-10 animate-fade-in">
           <div className="mb-8 text-center">
-            <div className="w-12 h-12 bg-primary text-white rounded-xl flex items-center justify-center font-bold text-xl mx-auto mb-4">
+            <div className="w-16 h-16 bg-gradient-primary shadow-lg shadow-primary/30 text-white rounded-2xl flex items-center justify-center font-extrabold text-2xl mx-auto mb-6 transform -rotate-3 hover:rotate-0 transition-transform">
               UB
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Welcome Back, Admin</h2>
-            <p className="text-gray-500 mt-2">Sign in to your admin account</p>
+            <h2 className="text-3xl font-extrabold text-[#2B3674] dark:text-white tracking-tight">Welcome Back</h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-2 font-medium">Sign in to your admin dashboard</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+              <label className="block text-sm font-bold text-[#2B3674] dark:text-gray-300 mb-2">Email Address</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Mail size={18} className="text-gray-400" />
                 </div>
                 <input
@@ -74,16 +76,16 @@ const Login = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent sm:text-sm transition-colors"
+                  className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-[#2B3674] dark:text-white sm:text-sm transition-all"
                   placeholder="admin@ubsglobal.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-sm font-bold text-[#2B3674] dark:text-gray-300 mb-2">Password</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock size={18} className="text-gray-400" />
                 </div>
                 <input
@@ -91,13 +93,13 @@ const Login = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-accent focus:border-accent sm:text-sm transition-colors"
+                  className="block w-full pl-11 pr-11 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-[#2B3674] dark:text-white sm:text-sm transition-all"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-primary transition-colors"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
