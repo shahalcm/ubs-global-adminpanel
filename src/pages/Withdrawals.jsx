@@ -12,7 +12,7 @@ const Withdrawals = () => {
   const fetchRequests = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await axios.get('http://localhost:5000/api/payments/admin/commissions', {
+      const res = await axios.get('https://ubs-global-server.onrender.com/api/payments/admin/commissions', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
