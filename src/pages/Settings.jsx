@@ -251,48 +251,50 @@ const Settings = () => {
                   </div>
                   
                   <div className="border border-slate-200 rounded-xl overflow-hidden flex-1 shadow-sm">
-                    <table className="w-full text-left text-sm">
-                      <thead className="bg-slate-50/80 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
-                        <tr>
-                          <th className="px-5 py-3.5">KEY NAME</th>
-                          <th className="px-5 py-3.5">LAST USED</th>
-                          <th className="px-5 py-3.5">STATUS</th>
-                          <th className="px-4 py-3.5 w-10"></th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        <tr>
-                          <td className="px-5 py-3.5 text-slate-800 font-medium text-xs">ERP_Production_v2</td>
-                          <td className="px-5 py-3.5 text-slate-500 text-[11px]">Oct 24,<br/>14:02</td>
-                          <td className="px-5 py-3.5">
-                            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">ACTIVE</span>
-                          </td>
-                          <td className="px-4 py-3.5 text-slate-400 hover:text-red-500 cursor-pointer transition-colors">
-                            <Trash2 size={16} />
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="px-5 py-3.5 text-slate-800 font-medium text-xs">Mobile_App_iOS</td>
-                          <td className="px-5 py-3.5 text-slate-500 text-[11px]">Oct 22,<br/>09:15</td>
-                          <td className="px-5 py-3.5">
-                            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">ACTIVE</span>
-                          </td>
-                          <td className="px-4 py-3.5 text-slate-400 hover:text-red-500 cursor-pointer transition-colors">
-                            <Trash2 size={16} />
-                          </td>
-                        </tr>
-                        <tr className="bg-slate-50/50">
-                          <td className="px-5 py-3.5 text-slate-500 font-medium text-xs">Legacy_Tracker_Old</td>
-                          <td className="px-5 py-3.5 text-slate-400 text-[11px]">Never</td>
-                          <td className="px-5 py-3.5">
-                            <span className="text-[10px] font-bold text-slate-500 bg-slate-200/80 px-2 py-0.5 rounded uppercase tracking-wider">REVOKED</span>
-                          </td>
-                          <td className="px-4 py-3.5 text-slate-300 hover:text-red-500 cursor-pointer transition-colors">
-                            <Trash2 size={16} />
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-sm min-w-[500px]">
+                        <thead className="bg-slate-50/80 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
+                          <tr>
+                            <th className="px-5 py-3.5">KEY NAME</th>
+                            <th className="px-5 py-3.5">LAST USED</th>
+                            <th className="px-5 py-3.5">STATUS</th>
+                            <th className="px-4 py-3.5 w-10"></th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          <tr>
+                            <td className="px-5 py-3.5 text-slate-800 font-medium text-xs">ERP_Production_v2</td>
+                            <td className="px-5 py-3.5 text-slate-500 text-[11px]">Oct 24,<br/>14:02</td>
+                            <td className="px-5 py-3.5">
+                              <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">ACTIVE</span>
+                            </td>
+                            <td className="px-4 py-3.5 text-slate-400 hover:text-red-500 cursor-pointer transition-colors">
+                              <Trash2 size={16} />
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="px-5 py-3.5 text-slate-800 font-medium text-xs">Mobile_App_iOS</td>
+                            <td className="px-5 py-3.5 text-slate-500 text-[11px]">Oct 22,<br/>09:15</td>
+                            <td className="px-5 py-3.5">
+                              <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">ACTIVE</span>
+                            </td>
+                            <td className="px-4 py-3.5 text-slate-400 hover:text-red-500 cursor-pointer transition-colors">
+                              <Trash2 size={16} />
+                            </td>
+                          </tr>
+                          <tr className="bg-slate-50/50">
+                            <td className="px-5 py-3.5 text-slate-500 font-medium text-xs">Legacy_Tracker_Old</td>
+                            <td className="px-5 py-3.5 text-slate-400 text-[11px]">Never</td>
+                            <td className="px-5 py-3.5">
+                              <span className="text-[10px] font-bold text-slate-500 bg-slate-200/80 px-2 py-0.5 rounded uppercase tracking-wider">REVOKED</span>
+                            </td>
+                            <td className="px-4 py-3.5 text-slate-300 hover:text-red-500 cursor-pointer transition-colors">
+                              <Trash2 size={16} />
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>

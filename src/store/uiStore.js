@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export const useUiStore = create((set) => ({
-  isSidebarCollapsed: false,
+  isSidebarCollapsed: window.innerWidth < 768,
   toggleSidebar: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
   isDarkMode: false,
   toggleDarkMode: () => {
