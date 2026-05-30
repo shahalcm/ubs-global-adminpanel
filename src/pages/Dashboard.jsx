@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Users, Store, Package, DollarSign, ShoppingBag, Clock, X, TrendingUp, TrendingDown, Plus, FolderPlus, Bell, FileText, Image as ImageIcon, DownloadCloud, Activity } from 'lucide-react'
-import { getDashboardStats } from '../services/adminService'
+import { getDashboardStats, getAdminProducts, approveProduct, updateAdminProduct } from '../services/adminService'
+import toast from 'react-hot-toast'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { formatCurrency } from '../utils/formatters'
 
@@ -48,6 +49,25 @@ const Dashboard = () => {
   const [orderStatusData, setOrderStatusData] = useState([])
   const [loading, setLoading] = useState(true)
 
+  const [pendingJobsAndServices, setPendingJobsAndServices] = useState([])
+  const [editProduct, setEditProduct] = useState(null)
+  const [editForm, setEditForm] = useState({ title: '', description: '', price: 0 })
+
+  const loadPendingListings = async () => {
+    try {
+      const prodData = await getAdminProducts({ approvalStatus: 'pending', limit: 100 })
+      if (prodData.products) {
+        const filtered = prodData.products.filter(p => {
+          const catName = p.category?.name || '';
+          return catName.toLowerCase().trim() === 'job portal' || catName.toLowerCase().trim() === 'service portal';
+        })
+        setPendingJobsAndServices(filtered)
+      }
+    } catch (err) {
+      console.error('Failed to load pending listings', err)
+    }
+  }
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -68,6 +88,8 @@ const Dashboard = () => {
           }))
           setOrderStatusData(statusData)
         }
+
+        await loadPendingListings()
       } catch (error) {
         console.error('Unable to load dashboard stats', error)
       } finally {
@@ -76,6 +98,39 @@ const Dashboard = () => {
     }
     fetchStats()
   }, [])
+
+  const handleApproveListing = async (productId) => {
+    try {
+      await approveProduct(productId)
+      toast.success('Listing approved successfully!')
+      await loadPendingListings()
+      const data = await getDashboardStats()
+      setStats(data.stats)
+    } catch (error) {
+      toast.error('Failed to approve listing')
+    }
+  }
+
+  const handleOpenEditModal = (product) => {
+    setEditProduct(product)
+    setEditForm({
+      title: product.title || '',
+      description: product.description || '',
+      price: product.price || 0
+    })
+  }
+
+  const handleUpdateListingSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      await updateAdminProduct(editProduct._id, editForm)
+      toast.success('Listing updated successfully!')
+      setEditProduct(null)
+      await loadPendingListings()
+    } catch (error) {
+      toast.error('Failed to update listing')
+    }
+  }
 
   const totalUsers = stats?.totalUsers ?? 0
   const totalSellers = stats?.totalSellers ?? 0
@@ -251,7 +306,7 @@ const Dashboard = () => {
           <h3 className="text-xl font-bold text-[#2B3674] dark:text-white mb-6">Revenue Analytics</h3>
           
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-500/10 dark:to-green-500/5 rounded-2xl">
+            <div className="p-4 bg-linear-to-br from-green-50 to-green-100 dark:from-green-500/10 dark:to-green-500/5 rounded-2xl">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Current Month Trend</p>
               <div className="flex items-center space-x-2">
                 {revenueTrend >= 0 ? (
@@ -269,7 +324,7 @@ const Dashboard = () => {
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">vs previous month</p>
             </div>
 
-            <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-500/5 rounded-2xl">
+            <div className="p-4 bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-500/5 rounded-2xl">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Growth Comparison</p>
               <div className="space-y-2 mt-2">
                 <div className="flex justify-between text-xs">
@@ -285,6 +340,79 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Pending Jobs & Services Moderation Table */}
+      <div className="card">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h3 className="text-xl font-bold text-[#2B3674] dark:text-white">Pending Jobs & Services</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Review, update, and approve newly listed jobs and services</p>
+          </div>
+          <span className="bg-[#EBF3FF] text-primary px-3.5 py-1.5 rounded-full text-xs font-bold">
+            {pendingJobsAndServices.length} Pending
+          </span>
+        </div>
+
+        {pendingJobsAndServices.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400 font-medium py-4 text-center">No pending jobs or services to moderate.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[600px]">
+              <thead>
+                <tr className="border-b border-gray-100 dark:border-gray-800 text-gray-500 font-bold text-xs uppercase tracking-wider">
+                  <th className="pb-3 pt-2">Details</th>
+                  <th className="pb-3 pt-2">Category</th>
+                  <th className="pb-3 pt-2">Seller/Company</th>
+                  <th className="pb-3 pt-2">Price/Salary</th>
+                  <th className="pb-3 pt-2 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                {pendingJobsAndServices.map((item) => (
+                  <tr key={item._id} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
+                    <td className="py-4 flex items-center space-x-3">
+                      <img 
+                        src={item.images?.[0] || 'https://via.placeholder.com/60'} 
+                        alt={item.title} 
+                        className="w-12 h-12 rounded-xl object-cover shadow-sm"
+                      />
+                      <div>
+                        <p className="font-bold text-[#2B3674] dark:text-white text-sm">{item.title}</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-xs line-clamp-1 mt-0.5">{item.description}</p>
+                      </div>
+                    </td>
+                    <td className="py-4 text-sm font-medium text-gray-600 dark:text-gray-300">
+                      <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${item.category?.name?.toLowerCase() === 'job portal' ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600'}`}>
+                        {item.category?.name || 'Uncategorized'}
+                      </span>
+                    </td>
+                    <td className="py-4 text-sm text-gray-500 dark:text-gray-400">
+                      {item.sellerId?.shopName || 'Unknown'}
+                    </td>
+                    <td className="py-4 text-sm font-bold text-[#2B3674] dark:text-white">
+                      ${item.price}
+                    </td>
+                    <td className="py-4 text-right space-x-2">
+                      <button 
+                        onClick={() => handleOpenEditModal(item)}
+                        className="px-3.5 py-1.5 border border-slate-200 dark:border-gray-700 text-[#2B3674] dark:text-gray-250 rounded-xl text-xs font-bold hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                      >
+                        Update
+                      </button>
+                      <button 
+                        onClick={() => handleApproveListing(item._id)}
+                        className="px-3.5 py-1.5 bg-green-505 bg-green-500 text-white rounded-xl text-xs font-bold hover:bg-green-600 shadow-sm shadow-green-500/20 transition-colors"
+                      >
+                        Approve
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="card">
@@ -303,6 +431,74 @@ const Dashboard = () => {
           })}
         </div>
       </div>
+
+      {/* Edit Modal Overlay */}
+      {editProduct && (
+        <div className="fixed inset-0 bg-[#0B0F2C]/65 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#111C44] w-full max-w-lg rounded-3xl p-6 shadow-2xl border border-slate-100 dark:border-gray-800 animate-scale-up">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-[#2B3674] dark:text-white">Update Job/Service Listing</h3>
+              <button 
+                onClick={() => setEditProduct(null)}
+                className="w-8 h-8 rounded-full bg-slate-50 dark:bg-white/5 flex items-center justify-center hover:bg-slate-100 transition-colors"
+              >
+                <X size={18} className="text-slate-505" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateListingSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Title</label>
+                <input 
+                  type="text" 
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  required
+                  className="w-full border border-slate-300 dark:border-gray-700 bg-transparent dark:text-white rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Description</label>
+                <textarea 
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  required
+                  rows={4}
+                  className="w-full border border-slate-300 dark:border-gray-700 bg-transparent dark:text-white rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Price / Salary (USD)</label>
+                <input 
+                  type="number" 
+                  value={editForm.price}
+                  onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })}
+                  required
+                  className="w-full border border-slate-300 dark:border-gray-700 bg-transparent dark:text-white rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-gray-800 mt-6">
+                <button 
+                  type="button"
+                  onClick={() => setEditProduct(null)}
+                  className="px-5 py-2 border border-slate-300 dark:border-gray-700 dark:text-gray-350 rounded-xl text-sm font-medium hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="px-5 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-opacity-95 shadow-md shadow-primary/20 transition-colors"
+                >
+                  Save Updates
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

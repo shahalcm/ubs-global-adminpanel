@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getSettings, updateSettings } from '../services/adminService';
+import toast from 'react-hot-toast';
 import { 
   Settings as SettingsIcon, 
   CreditCard, 
@@ -15,6 +17,43 @@ import {
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('General');
+  const [requireJobApproval, setRequireJobApproval] = useState(true);
+  const [requireServiceApproval, setRequireServiceApproval] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await getSettings();
+        if (res.success && res.settings) {
+          setRequireJobApproval(res.settings.requireJobApproval);
+          setRequireServiceApproval(res.settings.requireServiceApproval);
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      const res = await updateSettings({
+        requireJobApproval,
+        requireServiceApproval
+      });
+      if (res.success) {
+        toast.success('Settings updated successfully!');
+      } else {
+        toast.error(res.message || 'Failed to update settings');
+      }
+    } catch (error) {
+      toast.error('Failed to update settings');
+    } finally {
+      setLoading(false);
+    }
+  };
   
   const tabs = [
     { id: 'General', icon: SettingsIcon },
@@ -38,8 +77,12 @@ const Settings = () => {
           <button className="px-5 py-2 border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition-colors">
             Discard
           </button>
-          <button className="px-5 py-2 bg-[#0A0F2C] text-white rounded-lg font-medium hover:bg-slate-800 transition-colors">
-            Save Changes
+          <button 
+            onClick={handleSave}
+            disabled={loading}
+            className="px-5 py-2 bg-[#0A0F2C] text-white rounded-lg font-medium hover:bg-slate-800 transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </div>
@@ -121,6 +164,32 @@ const Settings = () => {
                       </div>
                       <div className="w-11 h-6 bg-slate-200 rounded-full flex items-center p-1 cursor-pointer transition-colors">
                         <div className="w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform"></div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-6 pt-5 border-t border-slate-100">
+                      <div>
+                        <p className="text-sm font-bold text-slate-800">Job Portal Approval</p>
+                        <p className="text-xs text-slate-500 mt-0.5">New/edited jobs require admin approval before going live</p>
+                      </div>
+                      <div 
+                        onClick={() => setRequireJobApproval(!requireJobApproval)}
+                        className={`w-11 h-6 rounded-full flex items-center p-1 cursor-pointer transition-colors ${requireJobApproval ? 'bg-[#007A7C]' : 'bg-slate-200'}`}
+                      >
+                        <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${requireJobApproval ? 'translate-x-5' : ''}`}></div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-6 pt-5 border-t border-slate-100">
+                      <div>
+                        <p className="text-sm font-bold text-slate-800">Service Portal Approval</p>
+                        <p className="text-xs text-slate-500 mt-0.5">New/edited services require admin approval before going live</p>
+                      </div>
+                      <div 
+                        onClick={() => setRequireServiceApproval(!requireServiceApproval)}
+                        className={`w-11 h-6 rounded-full flex items-center p-1 cursor-pointer transition-colors ${requireServiceApproval ? 'bg-[#007A7C]' : 'bg-slate-200'}`}
+                      >
+                        <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${requireServiceApproval ? 'translate-x-5' : ''}`}></div>
                       </div>
                     </div>
                   </div>

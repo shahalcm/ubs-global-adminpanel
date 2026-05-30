@@ -191,3 +191,21 @@ export const getTransactions = async (filters = {}) => {
   })
   return res.data
 }
+
+// System settings
+export const getSettings = async () => {
+  const res = await api.get('/admin/settings')
+  return res.data
+}
+
+export const updateSettings = async (data) => {
+  const res = await api.put('/admin/settings', data)
+  return res.data
+}
+
+export const updateAdminProduct = async (id, data) => {
+  const res = await api.put(`/admin/products/${id}`, data)
+  return res.data
+}
+
+
