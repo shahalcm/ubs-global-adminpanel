@@ -185,19 +185,19 @@ const Analytics = () => {
         <div className="card">
           <h3 className="text-xl font-bold text-[#2B3674] dark:text-white mb-6">Revenue Summary</h3>
           <div className="space-y-4">
-            <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-500/5 rounded-lg">
+            <div className="p-3 bg-linear-to-r from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-500/5 rounded-lg">
               <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Avg Daily</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                 {formatCurrency(revenueData.length > 0 ? revenueData.reduce((sum, item) => sum + item.revenue, 0) / revenueData.length : 0)}
               </p>
             </div>
-            <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-500/10 dark:to-green-500/5 rounded-lg">
+            <div className="p-3 bg-linear-to-r from-green-50 to-green-100 dark:from-green-500/10 dark:to-green-500/5 rounded-lg">
               <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Peak Day</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                 {formatCurrency(revenueData.length > 0 ? Math.max(...revenueData.map(item => item.revenue)) : 0)}
               </p>
             </div>
-            <div className="p-3 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-500/10 dark:to-purple-500/5 rounded-lg">
+            <div className="p-3 bg-linear-to-r from-purple-50 to-purple-100 dark:from-purple-500/10 dark:to-purple-500/5 rounded-lg">
               <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Period Total</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                 {formatCurrency(revenueData.reduce((sum, item) => sum + item.revenue, 0))}
@@ -216,7 +216,7 @@ const Analytics = () => {
             {sellerStats.topSellers?.map((seller, idx) => (
               <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
                     {idx + 1}
                   </div>
                   <div>
@@ -241,7 +241,7 @@ const Analytics = () => {
             {buyerStats.topBuyers?.map((buyer, idx) => (
               <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-10 h-10 rounded-full bg-linear-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm">
                     {idx + 1}
                   </div>
                   <div>
@@ -319,7 +319,7 @@ const Analytics = () => {
       <div className="card">
         <h3 className="text-xl font-bold text-[#2B3674] dark:text-white mb-6">Growth Trends</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-500/5 rounded-xl">
+          <div className="p-4 bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-500/5 rounded-xl">
             <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase mb-2">Revenue Growth</p>
             <div className="flex items-end space-x-2">
               <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats?.revenueTrend || 0}%</p>
@@ -332,7 +332,7 @@ const Analytics = () => {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">vs previous period</p>
           </div>
 
-          <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-500/10 dark:to-purple-500/5 rounded-xl">
+          <div className="p-4 bg-linear-to-br from-purple-50 to-purple-100 dark:from-purple-500/10 dark:to-purple-500/5 rounded-xl">
             <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase mb-2">Seller Growth</p>
             <div className="flex items-end space-x-2">
               <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats?.sellersTrend || 0}%</p>
@@ -345,7 +345,7 @@ const Analytics = () => {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">vs previous period</p>
           </div>
 
-          <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-500/10 dark:to-green-500/5 rounded-xl">
+          <div className="p-4 bg-linear-to-br from-green-50 to-green-100 dark:from-green-500/10 dark:to-green-500/5 rounded-xl">
             <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase mb-2">Buyer Growth</p>
             <div className="flex items-end space-x-2">
               <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats?.usersTrend || 0}%</p>
