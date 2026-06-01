@@ -37,3 +37,11 @@ export const onChatActivity = (callback) => {
 export const onNewSellerRequest = (callback) => {
   socket?.on('newSellerRequest', callback)
 }
+
+export const onOrderStatusChanged = (callback) => {
+  socket?.on('orderStatusChanged', callback)
+}
+
+export const offOrderStatusChanged = (callback) => {
+  socket?.off('orderStatusChanged', callback)
+}

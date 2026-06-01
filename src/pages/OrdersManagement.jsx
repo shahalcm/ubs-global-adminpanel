@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Search, Eye, ChevronLeft, ChevronRight, Filter, Download } from 'lucide-react'
 import { getAdminOrders } from '../services/adminService'
 import { formatCurrency } from '../utils/formatters'
+import { onOrderStatusChanged, offOrderStatusChanged } from '../services/socketService'
 
 const orderStatusConfig = {
   'placed': { bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-700 dark:text-blue-300', label: 'Placed' },
@@ -38,6 +39,15 @@ const OrdersManagement = () => {
 
   useEffect(() => {
     fetchOrders()
+
+    const handleOrderStatusChange = () => {
+      fetchOrders()
+    }
+
+    onOrderStatusChanged(handleOrderStatusChange)
+    return () => {
+      offOrderStatusChanged(handleOrderStatusChange)
+    }
   }, [])
 
   const fetchOrders = async () => {
