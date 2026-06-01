@@ -208,4 +208,21 @@ export const updateAdminProduct = async (id, data) => {
   return res.data
 }
 
+// Reviews Moderation
+export const getAdminReviews = async (filters = {}) => {
+  const res = await api.get('/admin/reviews', { params: filters })
+  return res.data
+}
+
+export const approveReview = async (id) => {
+  const res = await api.patch(`/admin/reviews/${id}/approve`)
+  return res.data
+}
+
+export const deleteReview = async (id) => {
+  const res = await api.delete(`/admin/reviews/${id}`)
+  return res.data
+}
+
+
 
