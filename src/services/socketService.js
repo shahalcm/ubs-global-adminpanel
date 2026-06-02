@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client'
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL
-  || 'https://ubs-global-server-production.up.railway.app'
+  || 'https://api.ubsglobalapp.com'
 
 let socket = null
 
