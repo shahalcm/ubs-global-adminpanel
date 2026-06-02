@@ -206,7 +206,7 @@ const Categories = () => {
                     onClick={() => selectCategory(category)}
                     className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 ${
                       isSelected
-                        ? 'bg-[#4318FF]/10 dark:bg-[#4318FF]/20 border-[#4318FF] shadow-sm'
+                        ? 'bg-primary/10 dark:bg-primary/20 border-primary shadow-sm'
                         : 'bg-white dark:bg-dark-card border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
                     }`}
                   >
@@ -227,12 +227,12 @@ const Categories = () => {
                       {/* Text info */}
                       <div>
                         <h3 className={`text-base font-bold ${
-                          isSelected ? 'text-[#4318FF] dark:text-[#00C2FF]' : 'text-gray-900 dark:text-white'
+                          isSelected ? 'text-primary dark:text-accent' : 'text-gray-900 dark:text-white'
                         }`}>
                           {category.name}
                         </h3>
                         <p className={`text-xs mt-0.5 ${
-                          isSelected ? 'text-[#4318FF]/80 dark:text-[#00C2FF]/80' : 'text-gray-500 dark:text-gray-400'
+                          isSelected ? 'text-primary/80 dark:text-accent/80' : 'text-gray-500 dark:text-gray-400'
                         }`}>
                           slug: {category.slug}
                         </p>
@@ -285,7 +285,7 @@ const Categories = () => {
               <button
                 type="button"
                 onClick={resetForm}
-                className="text-xs font-bold text-[#4318FF] dark:text-[#00C2FF] hover:underline"
+                className="text-xs font-bold text-primary dark:text-accent hover:underline"
               >
                 Reset to Create
               </button>
@@ -312,7 +312,7 @@ const Categories = () => {
                   </button>
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center w-full h-40 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-[#4318FF] dark:hover:border-[#00C2FF] bg-gray-50 dark:bg-gray-850/20 cursor-pointer transition-colors">
+                <label className="flex flex-col items-center justify-center w-full h-40 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-accent bg-gray-50 dark:bg-gray-850/20 cursor-pointer transition-colors">
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <Upload className="text-gray-400 mb-2" size={24} />
                     <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">Click to upload category image</p>
