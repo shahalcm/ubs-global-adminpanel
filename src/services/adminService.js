@@ -156,13 +156,13 @@ export const getAdminCategories = async () => {
 }
 
 export const createCategory = async (data) => {
-  const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+  const headers = data instanceof FormData ? { 'Content-Type': undefined } : undefined
   const res = await api.post('/admin/categories', data, { headers })
   return res.data
 }
 
 export const updateCategory = async (id, data) => {
-  const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+  const headers = data instanceof FormData ? { 'Content-Type': undefined } : undefined
   const res = await api.put(
     `/admin/categories/${id}`,
     data,
