@@ -26,6 +26,7 @@ import ContactRequests from './pages/ContactRequests'
 import ChatMonitor from './pages/ChatMonitor'
 import Transactions from './pages/Transactions'
 import Withdrawals from './pages/Withdrawals'
+import LegalCompliance from './pages/LegalCompliance'
 
 export default function App() {
   const { token } = useAuthStore()
@@ -85,6 +86,8 @@ export default function App() {
             element={<Settings />} />
           <Route path="/profile"
             element={<Profile />} />
+          <Route path="/legal-compliance"
+            element={<LegalCompliance />} />
         </Route>
       </Routes>
     </BrowserRouter>
