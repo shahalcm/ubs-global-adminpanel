@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Search, Eye, ChevronLeft, ChevronRight, Filter, Download } from 'lucide-react'
-import { getAdminOrders } from '../services/adminService'
+import { Search, Eye, ChevronLeft, ChevronRight, Download } from 'lucide-react'
+import { getAdminOrders, getDashboardStats } from '../services/adminService'
 import { formatCurrency } from '../utils/formatters'
 import { onOrderStatusChanged, offOrderStatusChanged } from '../services/socketService'
 
@@ -22,39 +22,69 @@ const paymentStatusConfig = {
 }
 
 const StatusBadge = ({ status, config }) => (
-  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${config.bg} ${config.text}`}>
-    {config.label}
+  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${config?.bg || 'bg-gray-100'} ${config?.text || 'text-gray-800'}`}>
+    {config?.label || status}
   </span>
 )
 
 const OrdersManagement = () => {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  
+  // Search & Filter States
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
+  
+  // Statistics summary state
+  const [stats, setStats] = useState({
+    total: 0,
+    delivered: 0,
+    inProgress: 0,
+    cancelled: 0
+  })
+
+  // Pagination states
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(10)
+  const [totalPages, setTotalPages] = useState(1)
+  const limit = 10
+
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [showDetails, setShowDetails] = useState(false)
 
+  // Keystroke Debouncing
   useEffect(() => {
-    fetchOrders()
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm)
+      setCurrentPage(1)
+    }, 400)
+    return () => clearTimeout(handler)
+  }, [searchTerm])
 
-    const handleOrderStatusChange = () => {
-      fetchOrders()
+  // Fetch overall statistics
+  const fetchStats = async () => {
+    try {
+      const data = await getDashboardStats()
+      if (data.success) {
+        const breakdown = data.stats?.orderStatusBreakdown || {}
+        const total = data.stats?.totalOrders || 0
+        const delivered = breakdown.delivered || 0
+        const inProgress = (breakdown.placed || 0) + (breakdown.confirmed || 0) + (breakdown.packed || 0) + (breakdown.shipped || 0)
+        const cancelled = (breakdown.cancelled || 0) + (breakdown.returned || 0)
+        setStats({ total, delivered, inProgress, cancelled })
+      }
+    } catch (e) {
+      console.error('Error fetching dashboard stats:', e)
     }
+  }
 
-    onOrderStatusChanged(handleOrderStatusChange)
-    return () => {
-      offOrderStatusChanged(handleOrderStatusChange)
-    }
-  }, [])
-
-  const fetchOrders = async () => {
+  // Fetch paginated orders from server
+  const fetchOrders = async (page = currentPage, search = debouncedSearch, status = filterStatus) => {
     try {
       setLoading(true)
-      const data = await getAdminOrders()
+      const data = await getAdminOrders({ page, limit, search, status })
       setOrders(data.orders || [])
+      setTotalPages(data.pagination?.pages || 1)
     } catch (error) {
       console.error('Error fetching orders:', error)
     } finally {
@@ -62,34 +92,52 @@ const OrdersManagement = () => {
     }
   }
 
-  // Filter orders
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = 
-      order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.buyerId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.sellerId?.shopName?.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesStatus = !filterStatus || order.orderStatus === filterStatus
-    
-    return matchesSearch && matchesStatus
-  })
+  useEffect(() => {
+    fetchStats()
+  }, [])
 
-  // Pagination
-  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedOrders = filteredOrders.slice(startIndex, startIndex + itemsPerPage)
+  useEffect(() => {
+    fetchOrders(currentPage, debouncedSearch, filterStatus)
+  }, [currentPage, debouncedSearch, filterStatus])
+
+  // Websocket updates
+  useEffect(() => {
+    const handleOrderStatusChange = () => {
+      fetchOrders(currentPage, debouncedSearch, filterStatus)
+      fetchStats()
+    }
+
+    onOrderStatusChanged(handleOrderStatusChange)
+    return () => {
+      offOrderStatusChanged(handleOrderStatusChange)
+    }
+  }, [currentPage, debouncedSearch, filterStatus])
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order)
     setShowDetails(true)
   }
 
-  if (loading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+  const renderPageNumbers = () => {
+    const pages = []
+    const startPage = Math.max(1, currentPage - 2)
+    const endPage = Math.min(totalPages, startPage + 4)
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => setCurrentPage(i)}
+          className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
+            currentPage === i
+              ? 'bg-primary text-white'
+              : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+          }`}
+        >
+          {i}
+        </button>
+      )
+    }
+    return pages
   }
 
   return (
@@ -100,14 +148,10 @@ const OrdersManagement = () => {
           <h1 className="text-3xl font-extrabold text-[#2B3674] dark:text-white">Orders Management</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Manage and track all customer orders</p>
         </div>
-        <button className="flex items-center space-x-2 bg-primary text-white px-4 py-2 rounded-xl hover:bg-opacity-90 transition">
-          <Download size={18} />
-          <span>Export</span>
-        </button>
       </div>
 
       {/* Filters */}
-      <div className="card space-y-4">
+      <div className="card space-y-4 bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
           <div className="flex-1 relative">
@@ -116,10 +160,7 @@ const OrdersManagement = () => {
               type="text"
               placeholder="Search by order number, buyer name, or seller..."
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value)
-                setCurrentPage(1)
-              }}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
@@ -141,28 +182,28 @@ const OrdersManagement = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm pt-2">
           <div className="p-3 bg-blue-50 dark:bg-blue-500/10 rounded-lg">
-            <p className="text-gray-600 dark:text-gray-400">Total Orders</p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-300">{orders.length}</p>
+            <p className="text-gray-600 dark:text-gray-400 font-medium">Total Orders</p>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-300">{stats.total}</p>
           </div>
           <div className="p-3 bg-green-50 dark:bg-green-500/10 rounded-lg">
-            <p className="text-gray-600 dark:text-gray-400">Delivered</p>
-            <p className="text-2xl font-bold text-green-600 dark:text-green-300">{orders.filter(o => o.orderStatus === 'delivered').length}</p>
+            <p className="text-gray-600 dark:text-gray-400 font-medium">Delivered</p>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-300">{stats.delivered}</p>
           </div>
           <div className="p-3 bg-yellow-50 dark:bg-yellow-500/10 rounded-lg">
-            <p className="text-gray-600 dark:text-gray-400">In Progress</p>
-            <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-300">{orders.filter(o => ['placed', 'confirmed', 'packed', 'shipped'].includes(o.orderStatus)).length}</p>
+            <p className="text-gray-600 dark:text-gray-400 font-medium">In Progress</p>
+            <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-300">{stats.inProgress}</p>
           </div>
           <div className="p-3 bg-red-50 dark:bg-red-500/10 rounded-lg">
-            <p className="text-gray-600 dark:text-gray-400">Cancelled/Returned</p>
-            <p className="text-2xl font-bold text-red-600 dark:text-red-300">{orders.filter(o => ['cancelled', 'returned'].includes(o.orderStatus)).length}</p>
+            <p className="text-gray-600 dark:text-gray-400 font-medium">Cancelled/Returned</p>
+            <p className="text-2xl font-bold text-red-600 dark:text-red-300">{stats.cancelled}</p>
           </div>
         </div>
       </div>
 
       {/* Orders Table */}
-      <div className="card overflow-hidden">
+      <div className="card bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -178,10 +219,33 @@ const OrdersManagement = () => {
                 <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Action</th>
               </tr>
             </thead>
-            <tbody>
-              {paginatedOrders.length > 0 ? (
-                paginatedOrders.map((order) => (
-                  <tr key={order._id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              {loading ? (
+                Array(limit).fill(0).map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-16"></div></td>
+                    <td className="px-6 py-4">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-24 mb-1"></div>
+                      <div className="h-3 bg-gray-150 dark:bg-gray-850 rounded w-16"></div>
+                    </td>
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-20"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-12"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-14 font-semibold"></div></td>
+                    <td className="px-6 py-4"><div className="h-6 bg-gray-200 dark:bg-gray-800 rounded-full w-14"></div></td>
+                    <td className="px-6 py-4"><div className="h-6 bg-gray-200 dark:bg-gray-800 rounded-full w-14"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-20"></div></td>
+                    <td className="px-6 py-4 text-center"><div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-8 mx-auto"></div></td>
+                  </tr>
+                ))
+              ) : orders.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                    No orders found
+                  </td>
+                </tr>
+              ) : (
+                orders.map((order) => (
+                  <tr key={order._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
                     <td className="px-6 py-4 text-sm font-semibold text-[#2B3674] dark:text-white">
                       {order.orderNumber}
                     </td>
@@ -227,22 +291,17 @@ const OrdersManagement = () => {
                     </td>
                   </tr>
                 ))
-              ) : (
-                <tr>
-                  <td colSpan="9" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                    No orders found
-                  </td>
-                </tr>
               )}
             </tbody>
           </table>
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {!loading && totalPages > 1 && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredOrders.length)} of {filteredOrders.length} orders
+              Showing page <span className="font-semibold">{currentPage}</span> of{' '}
+              <span className="font-semibold">{totalPages}</span>
             </p>
             <div className="flex items-center space-x-2">
               <button
@@ -252,19 +311,7 @@ const OrdersManagement = () => {
               >
                 <ChevronLeft size={18} />
               </button>
-              {Array.from({ length: totalPages }).map((_, idx) => (
-                <button
-                  key={idx + 1}
-                  onClick={() => setCurrentPage(idx + 1)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
-                    currentPage === idx + 1
-                      ? 'bg-primary text-white'
-                      : 'border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
-                  }`}
-                >
-                  {idx + 1}
-                </button>
-              ))}
+              {renderPageNumbers()}
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
@@ -395,4 +442,4 @@ const OrdersManagement = () => {
   )
 }
 
-export default OrdersManagement
+export default OrdersManagement;

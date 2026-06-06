@@ -183,7 +183,19 @@ export const getBanners = async () => {
 }
 
 export const createBanner = async (data) => {
-  const res = await api.post('/admin/banners', data)
+  const headers = data instanceof FormData ? { 'Content-Type': undefined } : undefined
+  const res = await api.post('/admin/banners', data, { headers })
+  return res.data
+}
+
+export const updateBanner = async (id, data) => {
+  const headers = data instanceof FormData ? { 'Content-Type': undefined } : undefined
+  const res = await api.put(`/admin/banners/${id}`, data, { headers })
+  return res.data
+}
+
+export const deleteBanner = async (id) => {
+  const res = await api.delete(`/admin/banners/${id}`)
   return res.data
 }
 
@@ -202,7 +214,8 @@ export const getSettings = async () => {
 }
 
 export const updateSettings = async (data) => {
-  const res = await api.put('/admin/settings', data)
+  const headers = data instanceof FormData ? { 'Content-Type': undefined } : undefined
+  const res = await api.put('/admin/settings', data, { headers })
   return res.data
 }
 
@@ -224,6 +237,50 @@ export const approveReview = async (id) => {
 
 export const deleteReview = async (id) => {
   const res = await api.delete(`/admin/reviews/${id}`)
+  return res.data
+}
+
+// Admin Payments & Payouts
+export const getCommissionsAndWithdrawals = async () => {
+  const res = await api.get('/payments/admin/commissions')
+  return res.data
+}
+
+export const executeAdminWithdrawal = async (amount) => {
+  const res = await api.post('/payments/admin/withdraw', { amount })
+  return res.data
+}
+
+export const updateWithdrawalStatus = async (id, status, adminNote = '') => {
+  const res = await api.patch(`/payments/admin/withdrawals/${id}`, { status, adminNote })
+  return res.data
+}
+
+export const createAdminProduct = async (data) => {
+  const headers = data instanceof FormData ? { 'Content-Type': undefined } : undefined
+  const res = await api.post('/admin/products', data, { headers })
+  return res.data
+}
+
+export const deleteAdminProduct = async (id) => {
+  const res = await api.delete(`/admin/products/${id}`)
+  return res.data
+}
+
+export const getJobApplications = async (filters = {}) => {
+  const res = await api.get('/admin/job-applications', { params: filters })
+  return res.data
+}
+
+export const deleteJobApplication = async (id) => {
+  const res = await api.delete(`/admin/job-applications/${id}`)
+  return res.data
+}
+
+export const downloadJobApplicationCV = async (id) => {
+  const res = await api.get(`/admin/job-applications/${id}/download-cv`, {
+    responseType: 'blob'
+  })
   return res.data
 }
 

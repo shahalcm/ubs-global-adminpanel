@@ -27,6 +27,8 @@ import ChatMonitor from './pages/ChatMonitor'
 import Transactions from './pages/Transactions'
 import Withdrawals from './pages/Withdrawals'
 import LegalCompliance from './pages/LegalCompliance'
+import JobsServices from './pages/JobsServices'
+
 
 export default function App() {
   const { token } = useAuthStore()
@@ -58,6 +60,8 @@ export default function App() {
             element={<UserManagement />} />
           <Route path="/products"
             element={<ProductManagement />} />
+          <Route path="/jobs-services"
+            element={<JobsServices />} />
           <Route path="/orders"
             element={<OrdersManagement />} />
           <Route path="/categories"

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Users, Store, Package, DollarSign, ShoppingBag, Clock, X, TrendingUp, TrendingDown, Plus, FolderPlus, Bell, FileText, Image as ImageIcon, DownloadCloud, Activity } from 'lucide-react'
 import { getDashboardStats, getAdminProducts, approveProduct, updateAdminProduct } from '../services/adminService'
 import toast from 'react-hot-toast'
@@ -7,12 +8,12 @@ import { formatCurrency } from '../utils/formatters'
 
 
 const quickActions = [
-  { icon: Plus, label: 'Add Product', gradient: 'from-[#4318FF] to-[#868CFF]' },
-  { icon: FolderPlus, label: 'Add Category', gradient: 'from-[#FFB547] to-[#FFD18B]' },
-  { icon: Bell, label: 'Notifications', gradient: 'from-[#FF5E5E] to-[#FF9B9B]' },
-  { icon: FileText, label: 'Reports', gradient: 'from-[#05CD99] to-[#6DE1B8]' },
-  { icon: ImageIcon, label: 'Banners', gradient: 'from-[#8A49F7] to-[#B68CFF]' },
-  { icon: DownloadCloud, label: 'Export', gradient: 'from-[#00C2FF] to-[#7AE6FF]' }
+  { icon: Plus, label: 'Add Product', gradient: 'from-[#4318FF] to-[#868CFF]', path: '/products' },
+  { icon: FolderPlus, label: 'Add Category', gradient: 'from-[#FFB547] to-[#FFD18B]', path: '/categories' },
+  { icon: Bell, label: 'Notifications', gradient: 'from-[#FF5E5E] to-[#FF9B9B]', path: '/notifications' },
+  { icon: FileText, label: 'Reports', gradient: 'from-[#05CD99] to-[#6DE1B8]', path: '/analytics' },
+  { icon: ImageIcon, label: 'Banners', gradient: 'from-[#8A49F7] to-[#B68CFF]', path: '/banners' },
+  { icon: DownloadCloud, label: 'Export Data', gradient: 'from-[#00C2FF] to-[#7AE6FF]', action: 'export' }
 ]
 
 const orderStatusColors = {
@@ -44,6 +45,7 @@ const StatsCard = ({ title, value, trend, trendUp, icon: Icon, gradient }) => (
 )
 
 const Dashboard = () => {
+  const navigate = useNavigate()
   const [stats, setStats] = useState(null)
   const [revenueData, setRevenueData] = useState([])
   const [orderStatusData, setOrderStatusData] = useState([])
@@ -144,10 +146,123 @@ const Dashboard = () => {
   const productsTrend = stats?.productsTrend ?? 0
   const revenueTrend = stats?.revenueTrend ?? 0
 
+  const handleExportData = () => {
+    try {
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + "Metric,Value\n"
+        + `Total Revenue,$${totalRevenue}\n`
+        + `Total Sellers,${totalSellers}\n`
+        + `Total Users,${totalUsers}\n`
+        + `Total Products,${totalProducts}\n`
+        + `Pending Orders,${pendingOrders}\n`
+        + `Pending Seller Requests,${pendingSellerRequests}\n`
+        + `Pending Product Approvals,${pendingProducts}\n`;
+        
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `UBS_Global_Admin_Stats_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Stats report exported successfully!');
+    } catch (err) {
+      toast.error('Failed to export data');
+    }
+  }
+
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="space-y-8 animate-pulse pb-10">
+        {/* Header Skeleton */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+          <div className="space-y-2">
+            <div className="h-8 w-60 bg-gray-250 dark:bg-gray-700 rounded-xl" />
+            <div className="h-4 w-80 bg-gray-200 dark:bg-gray-800 rounded-lg" />
+          </div>
+        </div>
+
+        {/* Stats Cards Grid Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="card p-6 bg-white dark:bg-dark-card border border-gray-100 dark:border-gray-800 rounded-2xl space-y-4">
+              <div className="flex justify-between items-center">
+                <div className="w-14 h-14 rounded-2xl bg-gray-200 dark:bg-gray-800" />
+                <div className="h-5 w-16 bg-gray-200 dark:bg-gray-800 rounded-lg" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 w-24 bg-gray-200 dark:bg-gray-800 rounded-md" />
+                <div className="h-8 w-32 bg-gray-300 dark:bg-gray-700 rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Charts Section Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Revenue Area Chart Skeleton */}
+          <div className="card lg:col-span-2 p-6 bg-white dark:bg-dark-card border border-gray-100 dark:border-gray-800 rounded-2xl space-y-6">
+            <div className="flex justify-between items-center">
+              <div className="h-6 w-56 bg-gray-300 dark:bg-gray-700 rounded-lg" />
+              <div className="h-9 w-40 bg-gray-200 dark:bg-gray-800 rounded-xl" />
+            </div>
+            <div className="h-[300px] w-full bg-gray-100 dark:bg-gray-800/50 rounded-2xl flex items-center justify-center">
+              <div className="w-12 h-12 border-4 border-gray-300 dark:border-gray-650 border-t-transparent rounded-full animate-spin" />
+            </div>
+          </div>
+
+          {/* Pie Chart Skeleton */}
+          <div className="card p-6 bg-white dark:bg-dark-card border border-gray-100 dark:border-gray-800 rounded-2xl space-y-6">
+            <div className="h-6 w-40 bg-gray-300 dark:bg-gray-700 rounded-lg" />
+            <div className="h-[250px] w-full bg-gray-100 dark:bg-gray-800/50 rounded-2xl flex items-center justify-center">
+              <div className="w-10 h-10 border-4 border-gray-300 dark:border-gray-650 border-t-transparent rounded-full animate-spin" />
+            </div>
+            <div className="flex justify-center gap-4">
+              <div className="h-4 w-16 bg-gray-200 dark:bg-gray-800 rounded-md" />
+              <div className="h-4 w-16 bg-gray-200 dark:bg-gray-800 rounded-md" />
+              <div className="h-4 w-16 bg-gray-200 dark:bg-gray-800 rounded-md" />
+            </div>
+          </div>
+        </div>
+
+        {/* Listings Table Skeleton */}
+        <div className="card p-6 bg-white dark:bg-dark-card border border-gray-100 dark:border-gray-800 rounded-2xl space-y-6">
+          <div className="flex justify-between items-center">
+            <div className="h-6 w-80 bg-gray-300 dark:bg-gray-700 rounded-lg" />
+          </div>
+          <div className="space-y-4">
+            {[1, 2, 3].map((row) => (
+              <div key={row} className="flex items-center justify-between py-3 border-b border-gray-150 dark:border-gray-850">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="w-16 h-12 bg-gray-200 dark:bg-gray-800 rounded-xl" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 w-48 bg-gray-300 dark:bg-gray-700 rounded-md" />
+                    <div className="h-3 w-72 bg-gray-200 dark:bg-gray-800 rounded-md" />
+                  </div>
+                </div>
+                <div className="w-24 h-4 bg-gray-200 dark:bg-gray-800 rounded-md mx-4" />
+                <div className="w-16 h-4 bg-gray-200 dark:bg-gray-800 rounded-md mx-4" />
+                <div className="flex gap-2">
+                  <div className="w-16 h-8 bg-gray-200 dark:bg-gray-800 rounded-xl" />
+                  <div className="w-16 h-8 bg-gray-300 dark:bg-gray-700 rounded-xl" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Actions Skeleton */}
+        <div className="card p-6 bg-white dark:bg-dark-card border border-gray-100 dark:border-gray-800 rounded-2xl space-y-6">
+          <div className="h-6 w-32 bg-gray-300 dark:bg-gray-700 rounded-lg" />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl flex flex-col items-center justify-center space-y-3">
+                <div className="w-14 h-14 rounded-2xl bg-gray-200 dark:bg-gray-800" />
+                <div className="h-4 w-20 bg-gray-200 dark:bg-gray-800 rounded-md" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     )
   }
@@ -421,7 +536,17 @@ const Dashboard = () => {
           {quickActions.map((action, idx) => {
             const Icon = action.icon
             return (
-              <button key={idx} className="group relative bg-gray-50 dark:bg-white/5 p-4 rounded-2xl flex flex-col items-center justify-center hover:-translate-y-2 transition-all duration-300">
+              <button 
+                key={idx} 
+                onClick={() => {
+                  if (action.path) {
+                    navigate(action.path)
+                  } else if (action.action === 'export') {
+                    handleExportData()
+                  }
+                }}
+                className="group relative bg-gray-50 dark:bg-white/5 p-4 rounded-2xl flex flex-col items-center justify-center hover:-translate-y-2 transition-all duration-300"
+              >
                 <div className={`w-14 h-14 rounded-2xl bg-linear-to-br ${action.gradient} flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                   <Icon className="text-white" size={26} strokeWidth={2.5} />
                 </div>

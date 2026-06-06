@@ -127,7 +127,7 @@ const ChatMonitor = () => {
               rooms.map((room) => {
                 const isActive = selectedRoom?._id === room._id
                 const buyerName = room.buyerId?.name || 'Buyer'
-                const sellerName = room.sellerId?.shopName || room.sellerId?.name || 'Seller'
+                const sellerName = room.sellerId?.shopName || room.sellerId?.name || 'UBS Global Admin Panel'
                 
                 return (
                   <button
@@ -184,10 +184,10 @@ const ChatMonitor = () => {
               <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-dark-bg flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">
-                    {selectedRoom.roomName || `${selectedRoom.buyerId?.name} × ${selectedRoom.sellerId?.shopName}`}
+                    {selectedRoom.roomName || `${selectedRoom.buyerId?.name} × ${selectedRoom.sellerId?.shopName || 'UBS Global Admin Panel'}`}
                   </h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Buyer: {selectedRoom.buyerId?.name} • Seller: {selectedRoom.sellerId?.shopName}
+                    Buyer: {selectedRoom.buyerId?.name} • Seller: {selectedRoom.sellerId?.shopName || 'UBS Global Admin Panel'}
                   </p>
                 </div>
                 {selectedRoom.productId && (
