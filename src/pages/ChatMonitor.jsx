@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   getChatRooms,
   getAdminChatMessages,
@@ -7,6 +8,8 @@ import {
 import toast from 'react-hot-toast'
 
 const ChatMonitor = () => {
+  const location = useLocation()
+  const redirectHandled = useRef(false)
   const [rooms, setRooms] = useState([])
   const [selectedRoom, setSelectedRoom] = useState(null)
   const [messages, setMessages] = useState([])
@@ -20,7 +23,17 @@ const ChatMonitor = () => {
   const loadRooms = async () => {
     try {
       const data = await getChatRooms()
-      setRooms(data.rooms || [])
+      const loadedRooms = data.rooms || []
+      setRooms(loadedRooms)
+      
+      // Auto-select room from navigation state if present and not handled yet
+      if (location.state?.roomId && !redirectHandled.current) {
+        const matchingRoom = loadedRooms.find(r => r._id === location.state.roomId)
+        if (matchingRoom) {
+          setSelectedRoom(matchingRoom)
+          redirectHandled.current = true
+        }
+      }
     } catch (error) {
       console.error('Failed to load chat rooms:', error)
     } finally {

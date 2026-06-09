@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, Store, Package, DollarSign, ShoppingBag, Clock, X, TrendingUp, TrendingDown, Plus, FolderPlus, Bell, FileText, Image as ImageIcon, DownloadCloud, Activity } from 'lucide-react'
-import { getDashboardStats, getAdminProducts, approveProduct, updateAdminProduct } from '../services/adminService'
+import { Users, Store, Package, DollarSign, ShoppingBag, Clock, X, TrendingUp, TrendingDown, Plus, FolderPlus, Bell, FileText, Image as ImageIcon, DownloadCloud, Activity, Search } from 'lucide-react'
+import { getDashboardStats, getAdminProducts, approveProduct, updateAdminProduct, getContactRequests, getChatRooms } from '../services/adminService'
 import toast from 'react-hot-toast'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { formatCurrency } from '../utils/formatters'
@@ -52,8 +52,40 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
 
   const [pendingJobsAndServices, setPendingJobsAndServices] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
   const [editProduct, setEditProduct] = useState(null)
+  const [recentRequests, setRecentRequests] = useState([])
+  const [activeChats, setActiveChats] = useState([])
+
+  const loadRecentMessages = async () => {
+    try {
+      const [reqData, chatData] = await Promise.all([
+        getContactRequests({ limit: 100 }),
+        getChatRooms()
+      ])
+      const allRequests = reqData.requests || []
+      const serviceInquiries = allRequests.filter(req => {
+        const catName = req.productId?.category?.name?.toLowerCase() || ''
+        return catName.includes('job') || catName.includes('service')
+      })
+      setRecentRequests(serviceInquiries.length > 0 ? serviceInquiries.slice(0, 5) : allRequests.slice(0, 5))
+      setActiveChats(chatData.rooms?.slice(0, 5) || [])
+    } catch (err) {
+      console.error('Failed to load recent dashboard messages', err)
+    }
+  }
   const [editForm, setEditForm] = useState({ title: '', description: '', price: 0 })
+
+  const filteredJobsAndServices = pendingJobsAndServices.filter(item => {
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) return true;
+    return (
+      item.title?.toLowerCase().includes(term) ||
+      item.description?.toLowerCase().includes(term) ||
+      item.category?.name?.toLowerCase().includes(term) ||
+      item.sellerId?.shopName?.toLowerCase().includes(term)
+    );
+  })
 
   const loadPendingListings = async () => {
     try {
@@ -91,7 +123,10 @@ const Dashboard = () => {
           setOrderStatusData(statusData)
         }
 
-        await loadPendingListings()
+        await Promise.all([
+          loadPendingListings(),
+          loadRecentMessages()
+        ])
       } catch (error) {
         console.error('Unable to load dashboard stats', error)
       } finally {
@@ -459,18 +494,32 @@ const Dashboard = () => {
 
       {/* Pending Jobs & Services Moderation Table */}
       <div className="card">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <div>
             <h3 className="text-xl font-bold text-[#2B3674] dark:text-white">Pending Jobs & Services</h3>
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Review, update, and approve newly listed jobs and services</p>
           </div>
-          <span className="bg-[#EBF3FF] text-primary px-3.5 py-1.5 rounded-full text-xs font-bold">
-            {pendingJobsAndServices.length} Pending
-          </span>
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="relative flex-1 md:flex-initial">
+              <input
+                type="text"
+                placeholder="Search jobs & services..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-dark-card text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-xs font-semibold shadow-soft dark:shadow-none w-full md:w-64"
+              />
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
+            </div>
+            <span className="bg-[#EBF3FF] dark:bg-primary/10 text-primary dark:text-accent px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">
+              {filteredJobsAndServices.length} Pending
+            </span>
+          </div>
         </div>
 
         {pendingJobsAndServices.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400 font-medium py-4 text-center">No pending jobs or services to moderate.</p>
+        ) : filteredJobsAndServices.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400 font-medium py-6 text-center">No pending jobs or services found matching "{searchTerm}".</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[600px]">
@@ -484,7 +533,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {pendingJobsAndServices.map((item) => (
+                {filteredJobsAndServices.map((item) => (
                   <tr key={item._id} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
                     <td className="py-4 flex items-center space-x-3">
                       <img 
@@ -528,6 +577,142 @@ const Dashboard = () => {
             </table>
           </div>
         )}
+      </div>
+
+      {/* Recent Activity & Messages Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Service Inquiries (Contact Requests) */}
+        <div className="card">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="text-xl font-bold text-[#2B3674] dark:text-white">Service Messages & Inquiries</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Inbound service connection and trade requests from buyers</p>
+            </div>
+            <button 
+              onClick={() => navigate('/contact-requests')}
+              className="text-xs font-bold text-primary dark:text-accent hover:underline"
+            >
+              View All
+            </button>
+          </div>
+
+          {recentRequests.length === 0 ? (
+            <p className="text-gray-500 dark:text-gray-400 font-medium py-4 text-center">No recent service inquiries.</p>
+          ) : (
+            <div className="space-y-4">
+              {recentRequests.map((req) => (
+                <div 
+                  key={req._id} 
+                  onClick={() => {
+                    if (req.chatRoomId) {
+                      navigate('/chat-monitor', { state: { roomId: req.chatRoomId } })
+                    } else {
+                      navigate('/contact-requests')
+                    }
+                  }}
+                  className="flex items-start justify-between p-3.5 rounded-2xl hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors border border-gray-100/50 dark:border-gray-800/50 cursor-pointer hover:border-primary/50 dark:hover:border-primary/50"
+                >
+                  <div className="flex items-start space-x-3.5">
+                    <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-[#868CFF] flex items-center justify-center text-white font-extrabold text-xs">
+                      {req.buyerName?.charAt(0).toUpperCase() || 'B'}
+                    </div>
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-bold text-[#2B3674] dark:text-white text-sm">{req.buyerName || 'Buyer'}</p>
+                        {req.productId?.category?.name && (
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold tracking-wide ${
+                            req.productId.category.name.toLowerCase().includes('job')
+                              ? 'bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400'
+                              : req.productId.category.name.toLowerCase().includes('service')
+                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400'
+                              : 'bg-gray-100 text-gray-650 dark:bg-gray-800 dark:text-gray-400'
+                          }`}>
+                            {req.productId.category.name}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold">{req.productName || 'Product Inquiry'}</p>
+                      <p className="text-gray-500 dark:text-gray-400 text-xs line-clamp-1">{req.message || 'No message contents.'}</p>
+                    </div>
+                  </div>
+                  <div className="text-right space-y-1.5">
+                    <span className="text-[10px] text-gray-400 block font-medium">
+                      {new Date(req.createdAt).toLocaleDateString()}
+                    </span>
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                      req.status === 'connected'
+                        ? 'bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400'
+                        : req.status === 'rejected'
+                          ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400'
+                          : 'bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400'
+                    }`}>
+                      {req.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Chat Messages Monitor */}
+        <div className="card">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="text-xl font-bold text-[#2B3674] dark:text-white">Active Chat Sessions</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Live conversations monitored between buyers and sellers</p>
+            </div>
+            <button 
+              onClick={() => navigate('/chat-monitor')}
+              className="text-xs font-bold text-primary dark:text-accent hover:underline"
+            >
+              View All
+            </button>
+          </div>
+
+          {activeChats.length === 0 ? (
+            <p className="text-gray-500 dark:text-gray-400 font-medium py-4 text-center">No active chat sessions.</p>
+          ) : (
+            <div className="space-y-4">
+              {activeChats.map((room) => {
+                const buyerName = room.buyerId?.name || 'Buyer'
+                const sellerName = room.sellerId?.shopName || 'Seller'
+                return (
+                  <div key={room._id} className="flex items-start justify-between p-3.5 rounded-2xl hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors border border-gray-100/50 dark:border-gray-800/50">
+                    <div className="flex items-start space-x-3.5">
+                      <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#FFB547] to-[#FFD18B] flex items-center justify-center text-white font-extrabold text-xs">
+                        💬
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className="font-bold text-[#2B3674] dark:text-white text-sm truncate max-w-[200px]">
+                          {room.roomName || `${buyerName} × ${sellerName}`}
+                        </p>
+                        {room.productId?.title && (
+                          <p className="text-[11px] text-gray-505 text-gray-500 dark:text-gray-450 font-medium">🏷️ {room.productId.title}</p>
+                        )}
+                        <p className="text-xs text-gray-400 dark:text-gray-500 line-clamp-1 italic">
+                          "{room.lastMessage || 'No messages yet.'}"
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right space-y-1.5">
+                      <span className="text-[10px] text-gray-400 block font-medium">
+                        {room.lastMessageAt ? new Date(room.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                      </span>
+                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                        room.botActive
+                          ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400'
+                          : 'bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400'
+                      }`}>
+                        {room.botActive ? 'AI Bot' : 'Live Chat'}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="card">
