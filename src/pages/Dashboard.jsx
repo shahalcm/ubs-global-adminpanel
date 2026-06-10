@@ -176,10 +176,10 @@ const Dashboard = () => {
   const pendingOrders = stats?.pendingOrders ?? 0
   const pendingSellerRequests = stats?.pendingSellerRequests ?? 0
   const pendingProducts = stats?.pendingProducts ?? 0
-  const usersTrend = stats?.usersTrend ?? 0
-  const sellersTrend = stats?.sellersTrend ?? 0
-  const productsTrend = stats?.productsTrend ?? 0
-  const revenueTrend = stats?.revenueTrend ?? 0
+  const usersTrend = Math.min(stats?.usersTrend ?? 0, 100)
+  const sellersTrend = Math.min(stats?.sellersTrend ?? 0, 100)
+  const productsTrend = Math.min(stats?.productsTrend ?? 0, 100)
+  const revenueTrend = Math.min(stats?.revenueTrend ?? 0, 100)
 
   const handleExportData = () => {
     try {
