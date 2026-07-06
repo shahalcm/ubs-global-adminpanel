@@ -451,6 +451,33 @@ const SellerManagement = () => {
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 italic">No business address specified.</p>
                 )}
               </div>
+
+              {/* Payment Details Section */}
+              <div className="border-t border-gray-100 dark:border-gray-800/40 pt-4.5 space-y-3">
+                <h5 className="text-xs font-extrabold text-[#2B3674] dark:text-indigo-400 uppercase tracking-wider">Payment Details</h5>
+                {selectedSeller.bankDetails ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-wider">Bank Name</span>
+                      <span className="text-sm font-bold text-gray-850 dark:text-white">{selectedSeller.bankDetails.bankName || '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-wider">Account Number</span>
+                      <span className="text-sm font-bold text-gray-850 dark:text-white">{selectedSeller.bankDetails.accountNumber || '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-wider">IFSC Code</span>
+                      <span className="text-sm font-bold text-gray-855 dark:text-white">{selectedSeller.bankDetails.ifscCode || '—'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-wider">UPI ID</span>
+                      <span className="text-sm font-bold text-gray-850 dark:text-white">{selectedSeller.bankDetails.upiId || '—'}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 italic">No payment details specified.</p>
+                )}
+              </div>
             </div>
             
             {/* Modal Footer (with moderation controls) */}
