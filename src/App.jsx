@@ -28,7 +28,7 @@ import Transactions from './pages/Transactions'
 import Withdrawals from './pages/Withdrawals'
 import LegalCompliance from './pages/LegalCompliance'
 import JobsServices from './pages/JobsServices'
-
+import ShippingManagement from './pages/ShippingManagement'
 
 export default function App() {
   const { token } = useAuthStore()
@@ -64,6 +64,8 @@ export default function App() {
             element={<JobsServices />} />
           <Route path="/orders"
             element={<OrdersManagement />} />
+          <Route path="/shipping"
+            element={<ShippingManagement />} />
           <Route path="/categories"
             element={<Categories />} />
           <Route path="/analytics"

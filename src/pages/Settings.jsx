@@ -36,6 +36,7 @@ const Settings = () => {
   const [faviconPreview, setFaviconPreview] = useState('');
 
   // Payments Settings
+  const [storeRegistrationFee, setStoreRegistrationFee] = useState(10);
   const [stripeEnabled, setStripeEnabled] = useState(true);
   const [stripePublicKey, setStripePublicKey] = useState('');
   const [stripeSecretKey, setStripeSecretKey] = useState('');
@@ -86,6 +87,7 @@ const Settings = () => {
         setFaviconUrl(s.faviconUrl || '');
         setFaviconPreview(s.faviconUrl || '');
         
+        setStoreRegistrationFee(s.storeRegistrationFee ?? 10);
         setStripeEnabled(s.stripeEnabled ?? true);
         setStripePublicKey(s.stripePublicKey || '');
         setStripeSecretKey(s.stripeSecretKey || '');
@@ -172,6 +174,7 @@ const Settings = () => {
       formData.append('maintenanceMode', String(maintenanceMode));
       formData.append('logoUrl', logoUrl);
       formData.append('faviconUrl', faviconUrl);
+      formData.append('storeRegistrationFee', String(storeRegistrationFee));
       formData.append('stripeEnabled', String(stripeEnabled));
       formData.append('stripePublicKey', stripePublicKey);
       formData.append('stripeSecretKey', stripeSecretKey);
@@ -331,7 +334,7 @@ const Settings = () => {
         {/* Content Area */}
         <div className="flex-1 flex flex-col gap-6">
           {loading ? (
-            <div className="bg-white dark:bg-dark-card rounded-2xl p-12 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center min-h-[350px]">
+            <div className="bg-white dark:bg-dark-card rounded-2xl p-12 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center min-h-87.5">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
               <p className="text-gray-500 dark:text-gray-400 text-sm mt-3 animate-pulse">Loading settings metadata...</p>
             </div>
@@ -465,7 +468,7 @@ const Settings = () => {
                           <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${requireJobApproval ? 'translate-x-5' : ''}`}></div>
                         </div>
                       </div>
-   
+
                       <div className="flex items-center justify-between pt-5 border-t border-gray-100 dark:border-gray-800">
                         <div>
                           <p className="text-sm font-bold text-gray-800 dark:text-gray-200">Service Portal Approval</p>
@@ -485,8 +488,34 @@ const Settings = () => {
 
               {/* Tab 2: Payments Settings */}
               {activeTab === 'Payments' && (
-                <div className="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
-                  <div className="flex items-center gap-2 mb-6">
+                <div className="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6">
+                  {/* Seller Registration Fee Card */}
+                  <div className="bg-linear-to-r from-indigo-50/80 via-blue-50/50 to-white dark:from-dark-bg/60 dark:via-dark-bg/40 dark:to-dark-card p-5 rounded-2xl border border-indigo-100 dark:border-gray-800">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <h3 className="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+                          New Seller Registration & Yearly Fee ($)
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          This amount will be automatically charged to all new sellers when completing their merchant registration.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">$</span>
+                        <input
+                          type="number"
+                          value={storeRegistrationFee}
+                          onChange={(e) => setStoreRegistrationFee(Number(e.target.value))}
+                          className="w-28 h-10 bg-white dark:bg-dark-card border border-gray-300 dark:border-gray-700 rounded-xl px-3 text-sm font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+                          min="0"
+                          step="1"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
                     <CreditCard className="text-primary dark:text-accent" size={20} />
                     <h2 className="text-lg font-bold text-gray-900 dark:text-white">Payment Gateways</h2>
                   </div>
@@ -575,7 +604,7 @@ const Settings = () => {
                         </div>
                       </div>
                     </div>
-   
+
                     {/* COD Card */}
                     <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-gray-50/50 dark:bg-dark-card/50 relative overflow-hidden flex flex-col justify-between">
                       <div className="flex items-center justify-between mb-4">
@@ -747,7 +776,7 @@ const Settings = () => {
                       <textarea 
                         value={ipWhitelist}
                         onChange={(e) => setIpWhitelist(e.target.value)}
-                        className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-700 dark:text-gray-200 bg-gray-50/50 dark:bg-dark-bg min-h-[90px] resize-none font-mono" 
+                        className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-700 dark:text-gray-200 bg-gray-50/50 dark:bg-dark-bg min-h-22.5 resize-none font-mono" 
                       />
                     </div>
                   </div>
@@ -772,7 +801,7 @@ const Settings = () => {
                   
                   <div className="border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden flex-1 shadow-sm">
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left text-sm min-w-[500px]">
+                      <table className="w-full text-left text-sm min-w-125">
                         <thead className="bg-gray-50/80 dark:bg-dark-bg text-gray-500 dark:text-gray-400 text-[11px] font-bold uppercase tracking-wider border-b border-gray-200 dark:border-gray-800">
                           <tr>
                             <th className="px-5 py-3.5">KEY NAME</th>

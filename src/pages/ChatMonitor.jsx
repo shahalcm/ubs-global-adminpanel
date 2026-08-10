@@ -151,7 +151,7 @@ const ChatMonitor = () => {
                     }`}
                   >
                     <div className="flex justify-between items-baseline w-full">
-                      <span className="font-semibold text-sm text-gray-900 dark:text-white truncate max-w-[160px]">
+                      <span className="font-semibold text-sm text-gray-900 dark:text-white truncate max-w-40">
                         {room.roomName || `${buyerName} x ${sellerName}`}
                       </span>
                       {room.lastMessageAt && (

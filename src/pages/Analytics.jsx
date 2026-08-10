@@ -166,7 +166,7 @@ const Analytics = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="card lg:col-span-2">
           <h3 className="text-xl font-bold text-[#2B3674] dark:text-white mb-6">Revenue Trend - Last 7 Days</h3>
-          <div className="h-[300px] w-full">
+          <div className="h-75 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={revenueData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(163, 174, 208, 0.2)" />

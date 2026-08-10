@@ -357,9 +357,10 @@ const Banners = () => {
                 disabled={submitting}
                 className="mt-1.5 block w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-card px-4 py-2.5 text-sm text-gray-900 dark:text-white shadow-sm focus:border-primary focus:outline-none"
               >
-                <option value="top">Top</option>
-                <option value="middle">Middle</option>
-                <option value="bottom">Bottom</option>
+                <option value="top">Top Banner Carousel</option>
+                <option value="middle">Middle Promo Banner</option>
+                <option value="bottom">Bottom Footer Banner</option>
+                <option value="realestate">Real Estate Category Banner</option>
               </select>
             </div>
 

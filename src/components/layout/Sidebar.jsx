@@ -5,7 +5,7 @@ import useAuthStore from '../../store/authStore';
 import {
   LayoutDashboard, Store, Users, Package, ShoppingBag, Grid, BarChart2,
   Image as ImageIcon, CreditCard, MessageSquare, Bell, Shield, Settings, LogOut,
-  ChevronLeft, ChevronRight, Wallet, DollarSign, Scale, Briefcase
+  ChevronLeft, ChevronRight, Wallet, DollarSign, Scale, Briefcase, Truck
 } from 'lucide-react';
 
 const navItems = [
@@ -15,6 +15,7 @@ const navItems = [
   { path: '/products', label: 'Products', icon: Package },
   { path: '/jobs-services', label: 'Jobs & Services', icon: Briefcase },
   { path: '/orders', label: 'Orders', icon: ShoppingBag },
+  { path: '/shipping', label: 'Shipping & Logistics', icon: Truck },
   { path: '/categories', label: 'Categories', icon: Grid },
   { path: '/analytics', label: 'Analytics', icon: BarChart2 },
   { path: '/banners', label: 'Banners', icon: ImageIcon },
@@ -36,12 +37,12 @@ const Sidebar = () => {
     <aside
       className={`fixed md:sticky z-50 bg-white dark:bg-sidebar text-[#2B3674] dark:text-white flex flex-col transition-all duration-300 h-screen top-0 border-r border-gray-100 dark:border-gray-800 shadow-[4px_0_24px_rgba(0,0,0,0.05)] md:shadow-none
         ${isSidebarCollapsed 
-          ? '-translate-x-full md:translate-x-0 md:w-[80px]' 
-          : 'translate-x-0 w-[280px]'
+          ? '-translate-x-full md:translate-x-0 md:w-20' 
+          : 'translate-x-0 w-70'
         }
       `}
     >
-      <div className="flex items-center justify-center h-[90px] border-b border-gray-100 dark:border-white/10 relative px-4 shrink-0">
+      <div className="flex items-center justify-center h-22.5 border-b border-gray-100 dark:border-white/10 relative px-4 shrink-0">
         <div className="flex items-center space-x-2">
           {(!isSidebarCollapsed || window.innerWidth < 768) ? (
             <img src="/logo.png" alt="UBS Global" className="h-10 w-auto object-contain drop-shadow-md" />

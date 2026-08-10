@@ -37,6 +37,14 @@ export const suspendSeller = async (id) => {
   return res.data
 }
 
+export const updateSellerSubscription = async (id, data) => {
+  const res = await api.patch(
+    `/admin/sellers/${id}/subscription`,
+    data
+  )
+  return res.data
+}
+
 // Users
 export const getUsers = async (filters = {}) => {
   const res = await api.get('/admin/users', {

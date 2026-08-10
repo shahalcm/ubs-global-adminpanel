@@ -117,7 +117,7 @@ const Moderation = () => {
                           className="w-10 h-10 rounded-lg object-cover border border-gray-100 dark:border-gray-800"
                         />
                         <div>
-                          <span className="font-semibold text-sm text-gray-800 dark:text-white block max-w-[180px] truncate">
+                          <span className="font-semibold text-sm text-gray-800 dark:text-white block max-w-45 truncate">
                             {review.productId?.title || 'Deleted Product'}
                           </span>
                           <span className="text-xs text-gray-400 block">

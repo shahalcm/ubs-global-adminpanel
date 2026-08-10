@@ -3,7 +3,8 @@ import {
   getSellers,
   approveSeller,
   rejectSeller,
-  suspendSeller
+  suspendSeller,
+  updateSellerSubscription
 } from '../services/adminService'
 import toast from 'react-hot-toast'
 
@@ -11,6 +12,12 @@ const SellerManagement = () => {
   const [sellers, setSellers] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedSeller, setSelectedSeller] = useState(null)
+  
+  // Subscription edit modal states
+  const [subStatus, setSubStatus] = useState('active')
+  const [subFee, setSubFee] = useState(10)
+  const [subExpiresAt, setSubExpiresAt] = useState('')
+  const [updatingSub, setUpdatingSub] = useState(false)
 
   // Search and Filter states
   const [searchTerm, setSearchTerm] = useState('')
@@ -83,6 +90,41 @@ const SellerManagement = () => {
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Action failed')
+    }
+  }
+
+  useEffect(() => {
+    if (selectedSeller) {
+      setSubStatus(selectedSeller.subscriptionStatus || 'active')
+      setSubFee(selectedSeller.subscriptionFee || selectedSeller.registrationFeeAmount || 10)
+      if (selectedSeller.subscriptionExpiresAt) {
+        const dateStr = new Date(selectedSeller.subscriptionExpiresAt).toISOString().split('T')[0]
+        setSubExpiresAt(dateStr)
+      } else {
+        const oneYear = new Date()
+        oneYear.setFullYear(oneYear.getFullYear() + 1)
+        setSubExpiresAt(oneYear.toISOString().split('T')[0])
+      }
+    }
+  }, [selectedSeller])
+
+  const handleSaveSubscription = async () => {
+    if (!selectedSeller) return
+    try {
+      setUpdatingSub(true)
+      const res = await updateSellerSubscription(selectedSeller._id, {
+        subscriptionStatus: subStatus,
+        subscriptionFee: Number(subFee),
+        subscriptionExpiresAt: subExpiresAt,
+        registrationFeePaid: subStatus === 'active'
+      })
+      toast.success(res.message || 'Yearly payment & subscription updated successfully!')
+      setSelectedSeller(res.seller)
+      loadSellers(currentPage, debouncedSearch, status)
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update subscription')
+    } finally {
+      setUpdatingSub(false)
     }
   }
 
@@ -343,7 +385,7 @@ const SellerManagement = () => {
       {/* Seller Details Modal */}
       {selectedSeller && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all duration-300 animate-fade-in">
-          <div className="bg-white dark:bg-dark-card rounded-[24px] shadow-2xl border border-gray-150 dark:border-gray-800/80 w-full max-w-lg overflow-hidden animate-slide-up">
+          <div className="bg-white dark:bg-dark-card rounded-3xl shadow-2xl border border-gray-150 dark:border-gray-800/80 w-full max-w-lg overflow-hidden animate-slide-up">
             
             {/* Modal Header */}
             <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800/50 flex justify-between items-center bg-gray-50/70 dark:bg-dark-bg/20">
@@ -452,9 +494,68 @@ const SellerManagement = () => {
                 )}
               </div>
 
+              {/* Yearly Subscription & Payment Section */}
+              <div className="border-t border-gray-100 dark:border-gray-800/40 pt-4.5 space-y-3">
+                <div className="flex justify-between items-center">
+                  <h5 className="text-xs font-extrabold text-[#2B3674] dark:text-indigo-400 uppercase tracking-wider">Yearly Payment & Subscription</h5>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide ${
+                    selectedSeller.subscriptionStatus === 'active' 
+                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' 
+                      : 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
+                  }`}>
+                    {selectedSeller.subscriptionStatus || 'Inactive'}
+                  </span>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-dark-bg/40 p-3.5 rounded-2xl border border-gray-200/60 dark:border-gray-800/40 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase block mb-1">Status</label>
+                      <select
+                        value={subStatus}
+                        onChange={(e) => setSubStatus(e.target.value)}
+                        className="w-full text-xs font-bold bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-800 rounded-xl px-2.5 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary"
+                      >
+                        <option value="active">Active (Paid)</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="expired">Expired</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase block mb-1">Fee Amount ($)</label>
+                      <input
+                        type="number"
+                        value={subFee}
+                        onChange={(e) => setSubFee(e.target.value)}
+                        className="w-full text-xs font-bold bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-800 rounded-xl px-2.5 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase block mb-1">Subscription Valid Until</label>
+                      <input
+                        type="date"
+                        value={subExpiresAt}
+                        onChange={(e) => setSubExpiresAt(e.target.value)}
+                        className="w-full text-xs font-bold bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-800 rounded-xl px-2.5 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleSaveSubscription}
+                    disabled={updatingSub}
+                    className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition-all shadow-sm disabled:opacity-50 cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    {updatingSub ? 'Saving Changes...' : 'Update Yearly Subscription'}
+                  </button>
+                </div>
+              </div>
+
               {/* Payment Details Section */}
               <div className="border-t border-gray-100 dark:border-gray-800/40 pt-4.5 space-y-3">
-                <h5 className="text-xs font-extrabold text-[#2B3674] dark:text-indigo-400 uppercase tracking-wider">Payment Details</h5>
+                <h5 className="text-xs font-extrabold text-[#2B3674] dark:text-indigo-400 uppercase tracking-wider">Bank Payment Details</h5>
                 {selectedSeller.bankDetails ? (
                   <div className="grid grid-cols-2 gap-4">
                     <div>

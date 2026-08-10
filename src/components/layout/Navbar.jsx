@@ -296,7 +296,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="h-[76px] m-4 rounded-[20px] glass-header flex items-center justify-between px-6 z-20 shadow-sm sticky top-4">
+    <header className="h-19 m-4 rounded-[20px] glass-header flex items-center justify-between px-6 z-20 shadow-sm sticky top-4">
       <div className="flex items-center space-x-4">
         <button onClick={toggleSidebar} className="p-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 transition-all text-[#2B3674] dark:text-white">
           <Menu size={20} />
@@ -453,7 +453,7 @@ const Navbar = () => {
             >
               <Bell size={18} />
               {unreadNotificationsCount > 0 && (
-                <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-red-500 text-white text-[9px] font-bold px-1 rounded-full flex items-center justify-center shadow-sm">
+                <span className="absolute top-1 right-1 min-w-4 h-4 bg-red-500 text-white text-[9px] font-bold px-1 rounded-full flex items-center justify-center shadow-sm">
                   {unreadNotificationsCount}
                 </span>
               )}
@@ -474,7 +474,7 @@ const Navbar = () => {
                   )}
                 </div>
 
-                <div className="max-h-[300px] overflow-y-auto divide-y divide-gray-50 dark:divide-gray-800/50">
+                <div className="max-h-75 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-800/50">
                   {notifications.length > 0 ? (
                     notifications.map((notif) => (
                       <div

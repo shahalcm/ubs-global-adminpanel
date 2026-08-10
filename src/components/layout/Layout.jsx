@@ -29,8 +29,8 @@ const Layout = () => {
       
       <div className="flex-1 flex flex-col overflow-hidden relative w-full">
         {/* Decorative background blur - hidden on small screens to improve performance */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 dark:bg-primary/10 rounded-full blur-[100px] pointer-events-none hidden md:block" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/5 dark:bg-accent/10 rounded-full blur-[100px] pointer-events-none hidden md:block" />
+        <div className="absolute top-0 right-0 w-125 h-125 bg-primary/5 dark:bg-primary/10 rounded-full blur-[100px] pointer-events-none hidden md:block" />
+        <div className="absolute bottom-0 left-0 w-125 h-125 bg-accent/5 dark:bg-accent/10 rounded-full blur-[100px] pointer-events-none hidden md:block" />
         
         <Navbar />
         <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 md:p-8 z-10 w-full">
