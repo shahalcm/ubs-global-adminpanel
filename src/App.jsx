@@ -31,6 +31,7 @@ import JobsServices from './pages/JobsServices'
 import ShippingManagement from './pages/ShippingManagement'
 import RegionalSellerPricing from './pages/RegionalSellerPricing'
 import SellerPromoCodes from './pages/SellerPromoCodes'
+import CallManagement from './pages/CallManagement'
 import SupportCallManager from './components/support/SupportCallManager'
 
 export default function App() {
@@ -82,6 +83,8 @@ export default function App() {
             element={<Banners />} />
           <Route path="/payments"
             element={<Payments />} />
+          <Route path="/calls"
+            element={<CallManagement />} />
           <Route path="/support"
             element={<Support />} />
           <Route path="/notifications"

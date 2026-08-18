@@ -1,22 +1,26 @@
 import { io } from 'socket.io-client'
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL
-  || 'https://api.ubsglobalapp.com'
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'https://api.ubsglobalapp.com'
 
 let socket = null
 
 export const connectAdminSocket = () => {
+  const adminToken = localStorage.getItem('adminToken')
+
   if (socket) {
-    console.log('🔌 Admin socket connection already exists. Status connected:', socket.connected)
     if (!socket.connected) {
-      console.log('🔄 Reconnecting existing admin socket instance...')
+      console.log('[Admin Socket] Reconnecting existing instance...')
+      socket.auth = { token: adminToken }
       socket.connect()
     }
     return socket
   }
 
+  console.log('[Admin Socket] Initializing new Socket.io connection to:', SOCKET_URL)
   socket = io(SOCKET_URL, {
-    transports: ['websocket', 'polling'], // Try websocket first, fallback to polling
+    auth: { token: adminToken },
+    query: { token: adminToken },
+    transports: ['websocket', 'polling'],
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
@@ -25,47 +29,45 @@ export const connectAdminSocket = () => {
   })
 
   socket.on('connect', () => {
-    console.log('✅ Admin socket connected')
-    const adminToken = localStorage.getItem('adminToken')
+    console.log('[Socket Connected] Admin socket ID:', socket.id)
     let adminData = null
     if (adminToken) {
       try {
         const base64Url = adminToken.split('.')[1]
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
         }).join(''))
         adminData = JSON.parse(jsonPayload)
       } catch (e) {
-        console.error('Failed to parse admin token details:', e)
+        console.error('[Admin Socket] Failed to parse JWT token details:', e)
       }
     }
     socket.emit('joinAdmin', adminData)
   })
 
   socket.on('disconnect', (reason) => {
-    console.log('❌ Admin socket disconnected:', reason)
+    console.warn('[Socket Disconnected] Admin socket disconnected. Reason:', reason)
     if (reason === 'io server disconnect' || reason === 'transport close' || reason === 'ping timeout') {
       socket.connect()
     }
   })
 
   socket.on('connect_error', (error) => {
-    console.warn('⚠️ Admin socket connection error:', error)
+    console.warn('[Admin Socket] Connection error:', error.message)
   })
 
-  // Reconnect automatically when the web page is focused or comes back online
   if (typeof window !== 'undefined') {
     window.addEventListener('focus', () => {
       if (socket && !socket.connected) {
-        console.log('🖥️ Admin panel focused. Reconnecting socket...')
+        console.log('[Admin Socket] Window focused. Reconnecting socket...')
         socket.connect()
       }
     })
 
     window.addEventListener('online', () => {
       if (socket && !socket.connected) {
-        console.log('🖥️ Admin panel back online. Reconnecting socket...')
+        console.log('[Admin Socket] Network restored online. Reconnecting socket...')
         socket.connect()
       }
     })
@@ -76,7 +78,6 @@ export const connectAdminSocket = () => {
 
 export const getAdminSocket = () => socket
 
-// Listen for admin events
 export const onNewContactRequest = (callback) => {
   socket?.on('newContactRequest', callback)
 }
