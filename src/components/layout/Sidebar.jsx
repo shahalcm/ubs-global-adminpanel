@@ -11,6 +11,8 @@ import {
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/sellers', label: 'Seller Management', icon: Store },
+  { path: '/seller-pricing', label: 'Regional Pricing', icon: Settings },
+  { path: '/seller-promos', label: 'Seller Promo Codes', icon: CreditCard },
   { path: '/users', label: 'User Management', icon: Users },
   { path: '/products', label: 'Products', icon: Package },
   { path: '/jobs-services', label: 'Jobs & Services', icon: Briefcase },

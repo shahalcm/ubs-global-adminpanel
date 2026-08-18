@@ -292,5 +292,68 @@ export const downloadJobApplicationCV = async (id) => {
   return res.data
 }
 
+// Regional Pricing Rules
+export const getRegionalPricingRules = async () => {
+  const res = await api.get('/admin/seller-pricing/rules')
+  return res.data
+}
+
+export const updateRegionalPricingRule = async (id, data) => {
+  const res = await api.put(`/admin/seller-pricing/rules/${id}`, data)
+  return res.data
+}
+
+// Country-Region Mappings
+export const getCountries = async (filters = {}) => {
+  const res = await api.get('/admin/seller-pricing/countries', {
+    params: filters
+  })
+  return res.data
+}
+
+export const moveCountryToRegion = async (id, regionCode) => {
+  const res = await api.patch(`/admin/seller-pricing/countries/${id}/region`, { regionCode })
+  return res.data
+}
+
+export const toggleCountryStatus = async (id) => {
+  const res = await api.patch(`/admin/seller-pricing/countries/${id}/status`)
+  return res.data
+}
+
+// Promo Codes
+export const getPromoCodes = async (filters = {}) => {
+  const res = await api.get('/admin/seller-pricing/promos', {
+    params: filters
+  })
+  return res.data
+}
+
+export const createPromoCode = async (data) => {
+  const res = await api.post('/admin/seller-pricing/promos', data)
+  return res.data
+}
+
+export const updatePromoCode = async (id, data) => {
+  const res = await api.put(`/admin/seller-pricing/promos/${id}`, data)
+  return res.data
+}
+
+export const deletePromoCode = async (id) => {
+  const res = await api.delete(`/admin/seller-pricing/promos/${id}`)
+  return res.data
+}
+
+// Analytics & Audit Logs
+export const getSellerPricingAnalytics = async () => {
+  const res = await api.get('/admin/seller-pricing/analytics')
+  return res.data
+}
+
+export const getPricingAuditLogs = async () => {
+  const res = await api.get('/admin/seller-pricing/audit-logs')
+  return res.data
+}
+
 
 

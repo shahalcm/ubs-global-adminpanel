@@ -26,7 +26,21 @@ export const connectAdminSocket = () => {
 
   socket.on('connect', () => {
     console.log('✅ Admin socket connected')
-    socket.emit('joinAdmin')
+    const adminToken = localStorage.getItem('adminToken')
+    let adminData = null
+    if (adminToken) {
+      try {
+        const base64Url = adminToken.split('.')[1]
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+        }).join(''))
+        adminData = JSON.parse(jsonPayload)
+      } catch (e) {
+        console.error('Failed to parse admin token details:', e)
+      }
+    }
+    socket.emit('joinAdmin', adminData)
   })
 
   socket.on('disconnect', (reason) => {
@@ -85,4 +99,8 @@ export const onOrderStatusChanged = (callback) => {
 
 export const offOrderStatusChanged = (callback) => {
   socket?.off('orderStatusChanged', callback)
+}
+
+export const setAvailability = (status) => {
+  socket?.emit('support-call:set-availability', { status })
 }

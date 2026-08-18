@@ -29,6 +29,9 @@ import Withdrawals from './pages/Withdrawals'
 import LegalCompliance from './pages/LegalCompliance'
 import JobsServices from './pages/JobsServices'
 import ShippingManagement from './pages/ShippingManagement'
+import RegionalSellerPricing from './pages/RegionalSellerPricing'
+import SellerPromoCodes from './pages/SellerPromoCodes'
+import SupportCallManager from './components/support/SupportCallManager'
 
 export default function App() {
   const { token } = useAuthStore()
@@ -42,6 +45,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Toaster position="top-right" />
+      {token && <SupportCallManager />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={
@@ -56,6 +60,10 @@ export default function App() {
             element={<Dashboard />} />
           <Route path="/sellers"
             element={<SellerManagement />} />
+          <Route path="/seller-pricing"
+            element={<RegionalSellerPricing />} />
+          <Route path="/seller-promos"
+            element={<SellerPromoCodes />} />
           <Route path="/users"
             element={<UserManagement />} />
           <Route path="/products"
