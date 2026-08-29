@@ -33,6 +33,7 @@ import RegionalSellerPricing from './pages/RegionalSellerPricing'
 import SellerPromoCodes from './pages/SellerPromoCodes'
 import CallManagement from './pages/CallManagement'
 import SupportCallManager from './components/support/SupportCallManager'
+import Localization from './pages/Localization'
 
 export default function App() {
   const { token } = useAuthStore()
@@ -105,6 +106,8 @@ export default function App() {
             element={<Profile />} />
           <Route path="/legal-compliance"
             element={<LegalCompliance />} />
+          <Route path="/localization"
+            element={<Localization />} />
         </Route>
       </Routes>
     </BrowserRouter>

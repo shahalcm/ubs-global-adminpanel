@@ -5,7 +5,7 @@ import useAuthStore from '../../store/authStore';
 import {
   LayoutDashboard, Store, Users, Package, ShoppingBag, Grid, BarChart2,
   Image as ImageIcon, CreditCard, MessageSquare, Bell, Shield, Settings, LogOut,
-  ChevronLeft, ChevronRight, Wallet, DollarSign, Scale, Briefcase, Truck, PhoneCall
+  ChevronLeft, ChevronRight, Wallet, DollarSign, Scale, Briefcase, Truck, PhoneCall, Globe
 } from 'lucide-react';
 
 const navItems = [
@@ -20,6 +20,7 @@ const navItems = [
   { path: '/shipping', label: 'Shipping & Logistics', icon: Truck },
   { path: '/categories', label: 'Categories', icon: Grid },
   { path: '/analytics', label: 'Analytics', icon: BarChart2 },
+  { path: '/localization', label: 'Localization', icon: Globe },
   { path: '/banners', label: 'Banners', icon: ImageIcon },
   { path: '/payments', label: 'Payments', icon: CreditCard },
   { path: '/transactions', label: 'Transactions', icon: DollarSign },

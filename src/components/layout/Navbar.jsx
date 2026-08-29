@@ -4,6 +4,7 @@ import { useUiStore } from '../../store/uiStore';
 import useAuthStore from '../../store/authStore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { connectAdminSocket } from '../../services/socketService';
+import { useTranslation } from '../../context/LanguageContext';
 
 const SEARCHABLE_PAGES = [
   { path: '/dashboard', label: 'Dashboard', keywords: ['home', 'main', 'overview', 'stats'] },
@@ -33,6 +34,7 @@ const Navbar = () => {
   const { admin } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
+  const { language, changeLanguage, languages, t } = useTranslation();
 
   // Search and history states
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,6 +42,11 @@ const Navbar = () => {
   const [searchHistory, setSearchHistory] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const searchRef = useRef(null);
+
+  // Language state
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const [langSearch, setLangSearch] = useState('');
+  const langRef = useRef(null);
 
   // Notification states
   const [notifications, setNotifications] = useState([]);
@@ -527,9 +534,62 @@ const Navbar = () => {
             )}
           </div>
 
-          <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300 transition-colors hidden sm:block">
-            <Globe size={18} />
-          </button>
+          {/* Language Selector Dropdown */}
+          <div ref={langRef} className="relative">
+            <button
+              onClick={() => setShowLangDropdown(!showLangDropdown)}
+              className="flex items-center space-x-1 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300 transition-colors cursor-pointer"
+              title="Change Language"
+            >
+              <Globe size={18} className="text-primary" />
+              <span className="text-xs font-semibold uppercase">{language}</span>
+            </button>
+
+            {showLangDropdown && (
+              <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-dark-card border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl z-50 overflow-hidden animate-slide-up">
+                <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#2B3674] dark:text-white">{t('Select Your Language')}</span>
+                  <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">{languages.length}</span>
+                </div>
+                <div className="p-2 border-b border-gray-100 dark:border-gray-800">
+                  <input
+                    type="text"
+                    placeholder={t('Search language') + '...'}
+                    value={langSearch}
+                    onChange={(e) => setLangSearch(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none text-[#2B3674] dark:text-white"
+                    autoFocus
+                  />
+                </div>
+                <div className="max-h-64 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-800/50">
+                  {languages
+                    .filter(l => l.name.toLowerCase().includes(langSearch.toLowerCase()) || l.nativeName.toLowerCase().includes(langSearch.toLowerCase()))
+                    .map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => {
+                          changeLanguage(lang.code)
+                          setShowLangDropdown(false)
+                          setLangSearch('')
+                        }}
+                        className={`w-full px-4 py-2.5 flex items-center justify-between text-xs cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors ${
+                          language === lang.code ? 'bg-primary/5 text-primary font-bold dark:text-white' : 'text-gray-700 dark:text-gray-300'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="text-base">{lang.flag}</span>
+                          <div className="flex flex-col text-left">
+                            <span className="font-semibold">{lang.name}</span>
+                            <span className="text-[10px] text-gray-400">{lang.nativeName}</span>
+                          </div>
+                        </div>
+                        {language === lang.code && <span className="text-primary font-bold">✓</span>}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
           <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-300 transition-colors">
             {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
